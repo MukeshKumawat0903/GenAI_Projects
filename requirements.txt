@@ -1,0 +1,7 @@
+streamlit              # Streamlit for building the web interface
+langchain              # LangChain for integrating large language models
+langchain_openai       # OpenAI integration for LangChain (if needed)
+langchain_core         # Core LangChain utilities
+langchain_ollama       # Ollama integration for LangChain
+python-dotenv          # To load environment variables from a .env file
+pytest                 # Testing framework for writing and running tests

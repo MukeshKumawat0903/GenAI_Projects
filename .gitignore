@@ -1,5 +1,6 @@
 # EEnvironments
 .env
+.venv
 
 # Operating System files
 .DS_Store 
