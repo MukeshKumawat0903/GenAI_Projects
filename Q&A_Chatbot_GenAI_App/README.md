@@ -33,46 +33,33 @@ An interactive **Q&A Chatbot** built using **Ollama** and **LangChain** framewor
 
 1. Clone the repository:
 
-    ```bash
-    git clone https://github.com/your-username/qa-chatbot-with-ollama.git
-    cd qa-chatbot-with-ollama
-    ```
-
+   ```bash
+   git clone https://github.com/your-username/qa-chatbot-with-ollama.git
+   cd qa-chatbot-with-ollama
+   ```
 2. Set up a virtual environment (recommended):
 
-    ```bash
-    python -m venv venv
-    ```
-
+   ```bash
+   python -m venv venv
+   ```
 3. Install dependencies:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
-
+   ```bash
+   pip install -r requirements.txt
+   ```
 4. Set up the `.env` file:
 
-    ```dotenv
-    LANGCHAIN_API_KEY=your-api-key-here
-    ```
-
+   ```dotenv
+   LANGCHAIN_API_KEY=your-api-key-here
+   ```
 5. Run the application:
 
-    ```bash
-    streamlit run Q&A_Chatbot_With_Ollama.py
-    ```
+   ```bash
+   streamlit run Q&A_Chatbot_With_Ollama.py
+   ```
 
 ## Usage
 
 1. Select the language model (e.g., **Mistral**) from the sidebar.
 2. Adjust parameters such as **Temperature** and **Max Tokens**.
 3. Enter a query and see the assistant's response.
-
-## Development
-
-### Running Tests
-
-To run tests, use **pytest**:
-
-```bash
-pytest

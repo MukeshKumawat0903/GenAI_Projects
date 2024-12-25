@@ -5,3 +5,8 @@ langchain_core         # Core LangChain utilities
 langchain_ollama       # Ollama integration for LangChain
 python-dotenv          # To load environment variables from a .env file
 pytest                 # Testing framework for writing and running tests
+langchain_groq         # Groq integration for LangChain
+langchain_community    # Community-maintained utilities for LangChain
+langchain_huggingface  # HuggingFace embeddings for LangChain
+faiss-cpu              # FAISS for vector search and similarity matching
+PyPDF2                 # For loading and parsing PDF files
