@@ -1,0 +1,21 @@
+# EEnvironments
+.env
+.venv
+
+# Operating System files
+.DS_Store 
+Thumbs.db
+
+# Build artifacts
+*.class
+*.jar
+*.war
+*.pyc
+
+# IDE-specific files
+.vscode/
+*.suo
+*.user
+
+# Log files
+*.log
