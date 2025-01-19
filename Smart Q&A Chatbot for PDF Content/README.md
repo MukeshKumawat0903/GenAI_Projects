@@ -1,6 +1,7 @@
 # Smart Q&A Chatbot for PDF Content
 
-A powerful and interactive chatbot that enables users to upload PDF files and engage in a conversational Q&A experience with the content. This chatbot leverages advanced language models and retrieval-augmented generation (RAG) techniques to provide accurate answers while maintaining a chat history for context-aware interactions.
+## Introduction
+A powerful and interactive chatbot (**Conversational RAG Chatbot**) that enables users to upload PDF files and engage in a conversational Q&A experience with the content. This chatbot leverages advanced language models and retrieval-augmented generation (RAG) techniques to provide accurate answers while maintaining a chat history for context-aware interactions.
 
 ---
 
