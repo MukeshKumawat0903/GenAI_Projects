@@ -142,5 +142,3 @@ This project is licensed under the [MIT License](LICENSE).
 - [Groq](https://groq.com/)
 
 ---
-
-Feel free to contact [your_email@example.com](mailto:your_email@example.com) for any questions or suggestions.

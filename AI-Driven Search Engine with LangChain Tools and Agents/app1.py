@@ -32,7 +32,7 @@ def initialize_llm(api_key: str):
     Returns:
         ChatGroq: Instance of the initialized language model.
     """
-    return ChatGroq(groq_api_key=api_key, model_name="Llama3-8b-8192", streaming=True)
+    return ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile", streaming=True)
 
 def initialize_agent_with_tools(llm):
     """
