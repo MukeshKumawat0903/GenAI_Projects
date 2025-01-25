@@ -4,12 +4,10 @@ import streamlit as st
 from langchain_groq import ChatGroq
 from langchain_community.utilities import ArxivAPIWrapper, WikipediaAPIWrapper
 from langchain_community.tools import ArxivQueryRun, WikipediaQueryRun, DuckDuckGoSearchRun
-# from langchain.agents import initialize_agent, AgentType
-from langchain.agents import create_react_agent
-# from langchain.callbacks import StreamlitCallbackHandler
+from langchain.agents import AgentExecutor, create_react_agent
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from langchain_core.prompts import PromptTemplate
-
+from langchain import hub
 
 # Load environment variables
 dotenv_path = os.path.abspath('../.env')
@@ -34,50 +32,65 @@ def initialize_llm(api_key: str):
     Returns:
         ChatGroq: Instance of the initialized language model.
     """
-    return ChatGroq(groq_api_key=api_key, model_name="Llama3-8b-8192", streaming=True)
+    return ChatGroq(groq_api_key=api_key, model_name="llama-3.3-70b-versatile", streaming=True)
 
 def initialize_agent_with_tools(llm):
     """
-    Initialize the LangChain agent with the specified tools and LLM.
-    
+    Initializes and configures an agent with a set of tools to handle user queries.
+
     Args:
-        llm (ChatGroq): Instance of the language model to use.
-        
+        llm (ChatGroq): The large language model instance used for reasoning and query processing.
+
     Returns:
-        LangChainAgent: Configured LangChain agent.
+        AgentExecutor: The configured agent executor ready to handle user queries with tools.
+
+    Process:
+        1. Defines a list of tools (`search_tool`, `arxiv_tool`, `wiki_tool`) that the agent can use.
+        2. Pulls a predefined "react" prompt from the LangChain Hub for generating instructions for the agent.
+        3. Creates a ReAct-based agent using the tools and the LLM.
+        4. Configures the agent executor with settings for error handling, verbosity, and execution constraints.
     """
+    # Define the tools that the agent will have access to
     tools = [search_tool, arxiv_tool, wiki_tool]
 
-    prompt_template = """
-    You are an AI assistant equipped with tools to help answer questions.
-    Available tools:
-    {tools}
+    # prompt_template = """
+    # You are an AI assistant equipped with tools to help answer questions.
+    # Available tools:
+    # {tools}
 
-    The tools you can use: {tool_names}
+    # The tools you can use: {tool_names}
 
-    When solving a query, think step-by-step and decide which tool to use.
-    Keep track of your progress in the scratchpad:
-    {agent_scratchpad}
+    # When solving a query, think step-by-step and decide which tool to use.
+    # Keep track of your progress in the scratchpad:
+    # {agent_scratchpad}
 
-    Query: {input}
-    """
-    prompt = PromptTemplate(
-        input_variables=["tools", "tool_names", "agent_scratchpad", "input"],
-        template=prompt_template
-    )
-
-    # search_agent = initialize_agent(
-    #     tools=tools,
-    #     llm=llm,
-    #     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    #     handle_parsing_errors=True
+    # Query: {input}
+    # """
+    # prompt = PromptTemplate(
+    #     input_variables=["tools", "tool_names", "agent_scratchpad", "input"],
+    #     template=prompt_template
     # )
 
+    # Retrieve the "ReAct" prompt from LangChain Hub to guide the agent's decision-making
+    prompt = hub.pull("hwchase17/react")  # Replace with a valid prompt if needed
+
+    # Create the agent using the ReAct framework, which allows reasoning and tool use
     search_agent = create_react_agent(
-        llm, tools=tools,
-        prompt= prompt
+        llm=llm, tools=tools, prompt=prompt
     )
-    return search_agent
+
+    # Initialize the AgentExecutor to manage the agent's execution with constraints
+    agent_executor = AgentExecutor(
+        agent=search_agent,
+        tools=tools,
+        verbose=True,                # Enable detailed logs for execution
+        handle_parsing_errors=True,  # Allow graceful handling of parsing errors
+        max_iterations=10,           # Set the maximum number of iterations per query
+        max_execution_time=300       # Set the timeout (in seconds) for query processing
+    )
+
+    # Return the configured agent executor
+    return agent_executor
 
 def main():
     """
@@ -105,14 +118,10 @@ def main():
     for msg in st.session_state["messages"]:
         st.chat_message(msg["role"]).write(msg["content"])
 
-    # for msg in st.session_state.messages:
-    #     st.chat_message(msg["role"]).write(msg['content'])
-
     # Handle user input
     user_input = st.chat_input(placeholder="What is machine learning?")
     if user_input:
         st.session_state["messages"].append({"role": "user", "content": user_input})
-        # st.session_state.messages.append({"role": "user", "content": user_input})
         st.chat_message("user").write(user_input)
 
         # Ensure the API key is provided
@@ -122,24 +131,27 @@ def main():
 
         # Initialize LLM and agent
         llm = initialize_llm(api_key)
-        search_agent = initialize_agent_with_tools(llm)
 
-        # Process the user query with the agent
+        # Initialize the AgentExecutor
+        agent_executor = initialize_agent_with_tools(llm)
+
+       # Process the user query with the agent
         with st.chat_message("assistant"):
             st_callback = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
             try:
-                # response = search_agent.run(st.session_state["messages"], callbacks=[st_callback])
-                # response = search_agent.invoke(st.session_state["messages"], callbacks=[st_callback])
-                print("Test1")
-                # Send only the latest user query to the agent
-                response = search_agent.invoke({"input": user_input}, callbacks=[st_callback])
-                print("Test2")
-
-                st.session_state["messages"].append({"role": "assistant", "content": response})
-                # st.session_state.messages.append({"role": "assistant", "content": response})
-                st.write(response)
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+                response = agent_executor.invoke(
+                    {"input": user_input}, {"callbacks": [st_callback]}
+                )
+                st.session_state["messages"].append({"role": "assistant", "content": response["output"]})
+                st.write(response["output"])
+            except Exception as e: 
+                if "iteration limit" in str(e) or "time limit" in str(e):  
+                    st.session_state["messages"].append({"role": "assistant", "content": "The agent reached its iteration or time limit. Here's the best answer I can provide based on the information gathered so far."}) 
+                    st.write("The agent reached its iteration or time limit. Here's the best answer I can provide based on the information gathered so far.") 
+                else: 
+                    st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
+
+
