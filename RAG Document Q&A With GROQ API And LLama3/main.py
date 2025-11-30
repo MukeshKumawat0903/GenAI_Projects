@@ -15,14 +15,13 @@ import time
 dotenv_path = os.path.abspath('../.env')  # Adjust the path as needed
 load_dotenv(dotenv_path)
 
-# Set API keys
+# API Key Settings
 os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 os.environ['GROQ_API_KEY'] = os.getenv("GROQ_API_KEY")
 os.environ['HF_TOKEN'] = os.getenv("HF_TOKEN")
 
-groq_api_key = os.getenv("GROQ_API_KEY")
-
 # Initialize the language model and embeddings
+groq_api_key = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(groq_api_key=groq_api_key, model_name="Llama3-8b-8192")
 embeddings_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
